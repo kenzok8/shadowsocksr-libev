@@ -105,7 +105,8 @@ run_cmd(const char *cmd)
     int ret = 0;
     char cmdstring[256];
 
-    sprintf(cmdstring, "%s\n", cmd);
+    sprintf(cmdstring, "%s
+", cmd);
     size_t len = strlen(cmdstring);
 
     if (shell_stdin != NULL) {
@@ -120,7 +121,7 @@ static int
 init_firewall()
 {
     int ret = 0;
-    char cli[256];
+    char cli[512];
     FILE *fp;
 
     if (getuid() != 0)
@@ -170,7 +171,7 @@ static int
 reset_firewall()
 {
     int ret = 0;
-    char cli[256];
+    char cli[512];
 
     if (getuid() != 0)
         return -1;
@@ -198,7 +199,7 @@ reset_firewall()
 static int
 set_firewall_rule(char *addr, int add)
 {
-    char cli[256];
+    char cli[512];
     struct cork_ip ip;
 
     if (getuid() != 0)
@@ -337,7 +338,7 @@ parse_addr_cidr(const char *str, char *host, int *cidr)
         *cidr = -1;
     } else {
         memcpy(host, str, ret);
-        host[ret] = '\0';
+        host[ret] = ' ';
         *cidr     = atoi(str + ret + 1);
     }
 }
@@ -397,13 +398,14 @@ init_acl(const char *path)
         if (fgets(buf, 256, f)) {
             // Trim the newline
             int len = strlen(buf);
-            if (len > 0 && buf[len - 1] == '\n') {
-                buf[len - 1] = '\0';
+            if (len > 0 && buf[len - 1] == '
+') {
+                buf[len - 1] = ' ';
             }
 
             char *comment = strchr(buf, '#');
             if (comment) {
-                *comment = '\0';
+                *comment = ' ';
             }
 
             char *line = trimwhitespace(buf);
@@ -600,4 +602,4 @@ outbound_block_match_host(const char *host)
     }
 
     return ret;
-}
+}
