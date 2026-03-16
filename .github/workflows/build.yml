@@ -12,8 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
 
       - name: Install dependencies
         run: |
@@ -26,7 +24,7 @@ jobs:
         run: ./autogen.sh
 
       - name: configure
-        run: ./configure --disable-documentation
+        run: ./configure --disable-documentation --enable-system-shared-lib
 
       - name: build
         run: make -j$(nproc)
