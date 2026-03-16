@@ -24,7 +24,11 @@ jobs:
         run: ./autogen.sh
 
       - name: configure
-        run: ./configure --disable-documentation --enable-system-shared-lib
+        run: |
+          ./configure \
+            --disable-documentation \
+            --enable-system-shared-lib \
+            CFLAGS="-fcommon"
 
       - name: build
         run: make -j$(nproc)
