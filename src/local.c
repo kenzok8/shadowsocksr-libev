@@ -94,7 +94,7 @@ int verbose = 0;
 int keep_resolving = 1;
 
 #ifdef ANDROID
-int log_tx_rx  = 0;
+int log_tx_rx  = 1;
 int vpn        = 0;
 uint64_t tx    = 0;
 uint64_t rx    = 0;
@@ -627,7 +627,7 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
                     uint16_t p =
                         ntohs(*(uint16_t *)(buf->array + 4 + 1 + name_len));
                     memcpy(host, buf->array + 4 + 1, name_len);
-                    host[name_len] = ' ';
+                    host[name_len] = '\0';
                     sprintf(port, "%d", p);
                 }
             } else if (atyp == 4) {
@@ -682,12 +682,10 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
 
                     if (acl || verbose) {
                         memcpy(host, hostname, ret);
-                        host[ret] = ' ';
+                        host[ret] = '\0';
                     }
 
                     ss_free(hostname);
-                } else {
-                    strncpy(host, ip, sizeof(host));
                 }
             }
 
@@ -715,7 +713,7 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
                 int err;
 
                 if (verbose)
-                    LOGI("acl_match_host %s result %d", host, host_match);
+                    LOGI("acl_match_host %s %d", host, host_match);
                 if (host_match > 0)
                     bypass = 0;                 // bypass hostnames in black list
                 else if (host_match < 0)
@@ -743,23 +741,11 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
                         }
                     }
 #endif
-                    if (outbound_block_match_host(ip) == 1) {
-                        if (verbose)
-                            LOGI("outbound blocked %s", ip);
-                        close_and_free_remote(EV_A_ remote);
-                        close_and_free_server(EV_A_ server);
-                        return;
-                    }
-
                     int ip_match = acl_match_host(ip);// -1 if IP in white list or 1 if IP in black list
                     if (verbose)
-                        LOGI("acl_match_host ip %s result %d mode %d", ip, ip_match, get_acl_mode());
-                    if (ip_match < 0)
+                        LOGI("acl_match_host ip %d mode %d", ip_match, get_acl_mode());
+                    if (ip_match < 0 || (get_acl_mode() == BLACK_LIST && ip_match == 0))
                         bypass = 1;
-                    else if (ip_match > 0)
-                        bypass = 0;
-                    else
-                        bypass = (get_acl_mode() == BLACK_LIST);
                 }
 
                 if (bypass) {
@@ -835,14 +821,9 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
                 // SSR beg
                 server_info _server_info;
                 memset(&_server_info, 0, sizeof(server_info));
-                if (server_env->hostname)
-                    strcpy(_server_info.host, server_env->hostname);
-                else
-                    strcpy(_server_info.host, server_env->host);
-                if (verbose) {
-                    LOGI("server_info host %s", _server_info.host);
-                }
-                _server_info.port = server_env->port;
+                strcpy(_server_info.host, inet_ntoa(((struct sockaddr_in*)&server_env->addr)->sin_addr));
+                _server_info.port = ((struct sockaddr_in*)&server_env->addr)->sin_port;
+                _server_info.port = _server_info.port >> 8 | _server_info.port << 8;
                 _server_info.param = server_env->obfs_param;
                 _server_info.g_data = server_env->obfs_global;
                 _server_info.head_len = get_head_size(ss_addr_to_send.array, 320, 30);
@@ -1099,11 +1080,7 @@ remote_send_cb(EV_P_ ev_io *w, int revents)
     if (!remote_send_ctx->connected) {
         int err_no = 0;
         socklen_t len = sizeof err_no;
-#ifdef __MINGW32__
-        int r = getsockopt(remote->fd, SOL_SOCKET, SO_ERROR, (char *)&err_no, &len);
-#else
-        int r = getsockopt(remote->fd, SOL_SOCKET, SO_ERROR, &err_no, &len);
-#endif
+        int r         = getsockopt(remote->fd, SOL_SOCKET, SO_ERROR, &err_no, &len);
         if (r == 0 && err_no == 0) {
             remote_send_ctx->connected = 1;
             ev_timer_stop(EV_A_ & remote_send_ctx->watcher);
@@ -1495,7 +1472,6 @@ main(int argc, char **argv)
     char *conf_path = NULL;
     char *iface = NULL;
     int remote_num = 0;
-    char *hostnames[MAX_REMOTE_NUM] = {NULL};
     ss_addr_t remote_addr[MAX_REMOTE_NUM];
     char *remote_port = NULL;
     int use_new_profile = 0;
@@ -1511,7 +1487,6 @@ main(int argc, char **argv)
             { "mtu",       required_argument, 0, 0 },
             { "mptcp",     no_argument,       0, 0 },
             { "help",      no_argument,       0, 0 },
-            { "host",      required_argument, 0, 0 },
             {           0,                 0, 0, 0 }
     };
 
@@ -1520,7 +1495,7 @@ main(int argc, char **argv)
     USE_TTY();
 
 #ifdef ANDROID
-    while ((c = getopt_long(argc, argv, "f:s:p:l:k:t:m:i:c:b:L:a:n:P:xhuUvVA6"
+    while ((c = getopt_long(argc, argv, "f:s:p:l:k:t:m:i:c:b:L:a:n:P:huUvVA6"
                             "O:o:G:g:",
                             long_options, &option_index)) != -1)
 #else
@@ -1545,8 +1520,6 @@ main(int argc, char **argv)
                 } else if (option_index == 4) {
                     usage();
                     exit(EXIT_SUCCESS);
-                } else if (option_index == 5) {
-                    hostnames[remote_num] = optarg;
                 }
                 break;
             case 's':
@@ -1632,9 +1605,6 @@ main(int argc, char **argv)
             break;
         case 'P':
             prefix = optarg;
-            break;
-        case 'x':
-            log_tx_rx = 1;
             break;
 #endif
             case '?':
@@ -1790,6 +1760,10 @@ main(int argc, char **argv)
     // parse tunnel addr
     if (tunnel_addr_str) {
         parse_addr(tunnel_addr_str, &tunnel_addr);
+#ifdef ANDROID
+        if (tunnel_addr.host && tunnel_addr.port)
+            log_tx_rx = 0;
+#endif
     }
 
 #ifdef __MINGW32__
@@ -1846,8 +1820,6 @@ main(int argc, char **argv)
                 serv->udp_port = serv_cfg->server_udp_port;
             }
             serv->host = ss_strdup(host);
-            if (hostnames[i])
-                serv->hostname = hostnames[i];
 
             // Setup keys
             LOGI("initializing ciphers... %s", serv_cfg->method);
@@ -1880,8 +1852,6 @@ main(int argc, char **argv)
                 FATAL("failed to resolve the provided hostname");
             }
             serv->host = ss_strdup(host);
-            if (hostnames[i])
-                serv->hostname = hostnames[i];
             serv->addr = serv->addr_udp = storage;
             serv->addr_len = serv->addr_udp_len = get_sockaddr_len((struct sockaddr *)storage);
             serv->port = serv->udp_port = atoi(port);
@@ -2161,4 +2131,4 @@ start_ss_local_server(profile_t profile)
     return 0;
 }
 
-#endif
+#endif
