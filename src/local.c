@@ -627,7 +627,7 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
                     uint16_t p =
                         ntohs(*(uint16_t *)(buf->array + 4 + 1 + name_len));
                     memcpy(host, buf->array + 4 + 1, name_len);
-                    host[name_len] = '\0';
+                    host[name_len] = ' ';
                     sprintf(port, "%d", p);
                 }
             } else if (atyp == 4) {
@@ -682,12 +682,12 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
 
                     if (acl || verbose) {
                         memcpy(host, hostname, ret);
-                        host[ret] = '\0';
+                        host[ret] = ' ';
                     }
 
                     ss_free(hostname);
                 } else {
-                    strncpy(host, ip, sizeof(ip));
+                    strncpy(host, ip, sizeof(host));
                 }
             }
 
@@ -2161,4 +2161,4 @@ start_ss_local_server(profile_t profile)
     return 0;
 }
 
-#endif
+#endif
