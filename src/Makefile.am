@@ -9,11 +9,11 @@ AM_CFLAGS += -I$(top_srcdir)/libsodium/src/libsodium/include
 endif
 AM_CFLAGS += -I$(top_srcdir)/libipset/include
 AM_CFLAGS += -I$(top_srcdir)/libcork/include
-AM_CFLAGS += $(LIBPCRE2_CFLAGS)
+AM_CFLAGS += $(LIBPCRE_CFLAGS)
 
 SS_COMMON_LIBS = $(top_builddir)/libipset/libipset.la \
                  $(top_builddir)/libcork/libcork.la \
-                 $(INET_NTOP_LIB) $(LIBPCRE2_LIBS)
+                 $(INET_NTOP_LIB) $(LIBPCRE_LIBS)
 if USE_SYSTEM_SHARED_LIB
 SS_COMMON_LIBS += -lev -lsodium -lm
 else
