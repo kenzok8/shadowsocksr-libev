@@ -361,7 +361,7 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
-LIBPCRE2 = @LIBPCRE2@
+LIBPCRE = @LIBPCRE@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
@@ -459,10 +459,10 @@ AM_CFLAGS = -g -O2 -Wall -Werror -Wno-deprecated-declarations \
 	-fno-strict-aliasing -std=gnu99 -D_GNU_SOURCE \
 	$(PTHREAD_CFLAGS) $(am__append_1) \
 	-I$(top_srcdir)/libipset/include \
-	-I$(top_srcdir)/libcork/include $(LIBPCRE2_CFLAGS)
+	-I$(top_srcdir)/libcork/include $(LIBPCRE_CFLAGS)
 SS_COMMON_LIBS = $(top_builddir)/libipset/libipset.la \
 	$(top_builddir)/libcork/libcork.la $(INET_NTOP_LIB) \
-	$(LIBPCRE2_LIBS) $(am__append_2) $(am__append_3)
+	$(LIBPCRE_LIBS) $(am__append_2) $(am__append_3)
 #bin_PROGRAMS += ss-tunnel
 @BUILD_WINCOMPAT_FALSE@bin_PROGRAMS += ss-server$(EXEEXT)
 sni_src = http.c \
