@@ -1024,10 +1024,13 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
 
     char addr_header[512] = { 0 };
     int addr_header_len   = 0;
-    uint8_t frag = 0;
-
     char host[257] = { 0 };
     char port[65]  = { 0 };
+    struct sockaddr_storage dst_addr;
+    memset(&dst_addr, 0, sizeof(struct sockaddr_storage));
+
+#ifdef MODULE_LOCAL
+    uint8_t frag = 0;
     if (server_ctx->tunnel_addr.host && server_ctx->tunnel_addr.port) {
         strncpy(host, server_ctx->tunnel_addr.host, 256);
         strncpy(port, server_ctx->tunnel_addr.port, 64);
@@ -1085,8 +1088,6 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
 
         frag = *(uint8_t *)(buf->array + 2);
         offset += 3;
-        struct sockaddr_storage dst_addr;
-        memset(&dst_addr, 0, sizeof(struct sockaddr_storage));
 
         addr_header_len = parse_udprealy_header(buf->array + offset, buf->len - offset,
                                                     host, port, &dst_addr);
@@ -1097,6 +1098,16 @@ server_recv_cb(EV_P_ ev_io *w, int revents)
 
         strncpy(addr_header, buf->array + offset, addr_header_len);
     }
+#else /* not MODULE_LOCAL */
+    offset += 3;
+    addr_header_len = parse_udprealy_header(buf->array + offset, buf->len - offset,
+                                                host, port, &dst_addr);
+    if (addr_header_len == 0) {
+        // error in parse header
+        goto CLEAN_UP;
+    }
+    strncpy(addr_header, buf->array + offset, addr_header_len);
+#endif /* MODULE_LOCAL */
 #endif
 
 #ifdef MODULE_LOCAL
