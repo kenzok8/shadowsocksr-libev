@@ -1,5 +1,7 @@
 # shadowsocks-libev
 
+[![Build](https://github.com/kenzok8/shadowsocksr-libev/actions/workflows/build.yml/badge.svg)](https://github.com/kenzok8/shadowsocksr-libev/actions/workflows/build.yml)
+
 ## Intro
 
 [Shadowsocks-libev](http://shadowsocks.org) is a lightweight secured SOCKS5
@@ -9,9 +11,7 @@ It is a port of [Shadowsocks](https://github.com/shadowsocks/shadowsocks)
 created by [@clowwindy](https://github.com/clowwindy), which is maintained by
 [@madeye](https://github.com/madeye) and [@linusyang](https://github.com/linusyang).
 
-Current version: 2.5.6 | [Changelog](debian/changelog)
-
-Travis CI: [![Travis CI](https://travis-ci.org/shadowsocks/shadowsocks-libev.svg?branch=master)](https://travis-ci.org/shadowsocks/shadowsocks-libev)
+Current maintained repository: [kenzok8/shadowsocksr-libev](https://github.com/kenzok8/shadowsocksr-libev) | [Changelog](debian/changelog)
 
 ## Features
 
