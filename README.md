@@ -11,7 +11,7 @@ It is a port of [Shadowsocks](https://github.com/shadowsocks/shadowsocks)
 created by [@clowwindy](https://github.com/clowwindy), which is maintained by
 [@madeye](https://github.com/madeye) and [@linusyang](https://github.com/linusyang).
 
-Current maintained repository: [kenzok8/shadowsocksr-libev](https://github.com/kenzok8/shadowsocksr-libev) | [Changelog](debian/changelog)
+Current maintained repository: [kenzok8/shadowsocksr-libev](https://github.com/kenzok8/shadowsocksr-libev) | Current maintained version: 2.5.10 | [Changelog](debian/changelog)
 
 ## Features
 
