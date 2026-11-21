@@ -17,7 +17,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential autoconf libtool automake \
-            libssl-dev libpcre3-dev libc-ares-dev libev-dev \
+            libssl-dev libpcre2-dev libc-ares-dev libev-dev \
             libsodium-dev libudns-dev
 
       - name: Build
