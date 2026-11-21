@@ -718,6 +718,7 @@ whitespace:
                             break;
                         }
 
+                    /* fall through: a comma without flag_need_comma is unexpected */
                     default:
 
                         sprintf(error, "%d:%d: Unexpected `%c` in object",
