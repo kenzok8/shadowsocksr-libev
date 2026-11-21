@@ -324,7 +324,7 @@ static void
 parse_addr_cidr(const char *str, char *host, int *cidr)
 {
     int ret = -1, n = 0;
-    char *pch;
+    const char *pch;
 
     pch = strchr(str, '/');
     while (pch != NULL) {
